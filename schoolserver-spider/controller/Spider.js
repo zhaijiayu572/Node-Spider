@@ -5,11 +5,28 @@ var spider = require('./common_spider');
 exports.insert_data = function (req,res,next) {
 
     var Res = res;
-    var url = 'http://www.suibi8.com/suibi/youji';
-    url = 'http://www.sina.com.cn';
-
+    var url = 'http://www.fanwen99.cn/article/%E4%B8%AD%E5%9B%BD%E7%9A%84%E7%BE%8E%E9%A3%9F%E4%BB%8B%E7%BB%8D.htm';
+    // url = 'http://www.sina.com.cn';
     spider.getHtml(url,function(html){
-        Res.send(html);
+        var $ = cheerio.load(html);
+        var urls = [];
+        $('#left dl dt').each(function () {
+            var url = 'http://www.fanwen99.cn'+$(this).find('a').attr('href');
+            urls.push(url);
+        });
+        for(var i=0;i<urls.length;i++){
+            spider.getHtml(urls[i],function (article) {
+                var $ = cheerio.load(article);
+                var content = '';
+                var title = $('#left>h1').text();
+                $('#doctext p').each(function () {
+                    content = content+'<p>'+$(this).text()+'</p>';
+                });
+                spider_model.insert_data(title,content,1);
+            })
+        }
+        Res.send('success');
+
     });
 
     // res.send('a');

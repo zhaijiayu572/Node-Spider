@@ -11,6 +11,9 @@ exports.query = function (sql,arr,callback) {
         // connected! (unless `err` is set)
         connection.query(sql,arr,function (error, results, fields) {
             connection.release();
+            // if(error){
+            //     console.log(error);
+            // }
             callback&&callback(results);
         })
     });

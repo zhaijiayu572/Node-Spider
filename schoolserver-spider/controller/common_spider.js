@@ -9,7 +9,7 @@ exports.getHtml = function (url,callback) {
         });
         res.on('end',function () {
             var data = Buffer.concat(chunks,length);
-            var html = data.toString();
+            var html = data.toString('utf8');
             callback(html);
         })
     })

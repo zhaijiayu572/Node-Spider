@@ -3,24 +3,16 @@ var moment = require('moment');
 var eatImgArr = ['0f8e386df638a36cbbd9d7d651d98b21.jpg',
     '2f2b8ed51b7702ded2fd31908ad96b65.jpg','3fef23a3d671289442a73bc1b0644db6.jpg',
     '68c4ef1b75ad9a52123196a58f56c732.jpg','e9068e90f9ba88e199e3825fdb9219d9.jpg','efefe1eb3dfee75bcc1eb00bc1335e71.jpg'];
-exports.insert_data = function(title,content,type,callback){
+exports.insert_data = function(title,content,type,imgName,callback){
     var sql = "insert into article(article_title,article_content,type,add_time,show_img) values(?,?,?,?,?)";
     var time = moment().format();
     var imgArr = [];
-    switch (type){
-        case 1:
-            imgArr = eatImgArr;
-            break;
-        case 2:
-            imgArr = sightImgArr;
-            break;
-        case 3:
-            imgArr = bookImgArr;
-            break;
+    if(!imgName){
+        var length = imgArr.length;
+        var rand = Math.floor(Math.random()*length);
+        imgName = imgArr[rand]
     }
-    var length = imgArr.length;
-    var rand = Math.floor(Math.random()*length);
-    var arr = [title,content,type,time,imgArr[rand]];
+    var arr = [title,content,type,time,imgName];
     db.query(sql,arr,callback);
 };
 exports.get_data = function (callback) {

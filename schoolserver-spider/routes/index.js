@@ -30,6 +30,7 @@ router.get('/spider',function (req,res,next){
       })
   })
 });
-router.get('/insert',spider.insert_data);
-router.get('/show',spider.show)
+router.get('/insert_eat',spider.insert_eat_data);
+router.get('/insert_book',spider.insert_book_data);
+router.get('/show',spider.show);
 module.exports = router;

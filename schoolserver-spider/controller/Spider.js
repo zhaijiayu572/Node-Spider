@@ -2,8 +2,9 @@ var spider_model = require('../model/Spider_model');
 var cheerio = require('cheerio');
 var http = require('http');
 var spider = require('./common_spider');
-exports.insert_data = function (req,res,next) {
-
+var request = require('request');
+var fs = require('fs');
+exports.insert_eat_data = function (req,res,next) {
     var Res = res;
     var url = 'http://www.fanwen99.cn/article/%E4%B8%AD%E5%9B%BD%E7%9A%84%E7%BE%8E%E9%A3%9F%E4%BB%8B%E7%BB%8D.htm';
     // url = 'http://www.sina.com.cn';
@@ -29,58 +30,61 @@ exports.insert_data = function (req,res,next) {
 
     });
 
-    // res.send('a');
-    // http.get(url,function (res) {
-    //     var chunks = [];
-    //     var length = 0;
-    //     res.on('data',function (chunk) {
-    //         chunks.push(chunk);
-    //         length +=chunk.length
-    //     });
-    //     res.on('end',function () {
-    //         var data = Buffer.concat(chunks,length);
-    //         var html = data.toString();
-    //
-    //         console.log('b');
-    //         var arr = [];
-    //         var $ = cheerio.load(html);
+};
+function download(url,path,filename,callback) {
+    console.log('a');
+    http.get(url, function(res) {
+        var imgData = "";
+        res.setEncoding("binary"); //一定要设置response的编码为binary否则会下载下来的图片打不开
+        res.on("data", function (chunk) {
+            imgData += chunk;
+        });
+        path = path+'/'+filename;
+        res.on("end", function () {
+            fs.writeFile(path, imgData, "binary", function (err) {
+                if (err) {
+                    console.log("down fail");
+                }
+                console.log("down success");
+                callback();
+            });
+        });
+    });
+
+}
+exports.insert_book_data = function (req,res,next) {
+    var url = "http://www.haoshu100.com/archives/category/%E7%BB%8F%E5%85%B8%E5%90%8D%E8%91%97";
+    var Res = res;
+    spider.getHtml(url,function (html) {
+        var $ = cheerio.load(html);
+        var srcs = [];
+        $('.art_img_box h2').each(function () {
+            var src = $(this).find('a').attr('href');
+            srcs.push(src);
+        });
+        console.log(srcs.length);
+        for(var i=0;i<srcs.length;i++){
+            console.log('b');
+            spider.getHtml(srcs[i],function (data) {
+                var $ = cheerio.load(data);
+                var content = '';
+                var title = $('.art_title h1').text();
+                $('.article_content p').each(function () {
+                    content = content +'<p>'+$(this).text()+'</p>';
+                });
+                var imgName = Math.floor(Math.random()*1000)+'.jpg';
+                var imgSrc = $('.article_content img').attr('src');
+                download(imgSrc,'./img',imgName,function () {
+                //     spider_model.insert_data(title,content,2,imgName);
+                });
+                spider_model.insert_data(title,content,3,imgName);
+
+            });
+        }
+        Res.send('hello');
 
 
-            // $('.list .list_content li').each(function () {
-            //     url = $(this).find('h4 a').attr('href');
-            //     console.log('c');
-            //     Res.send('end');
-
-                // http.get(url,function (res) {
-                //     arr.push(url);
-                //     var chunks = [];
-                //     var length = 0;
-                //     res.on('data',function (chunk) {
-                //         chunks.push(chunk);
-                //         length +=chunk.length
-                //     });
-                //     res.on('end',function () {
-                //         var data = Buffer.concat(chunks,length);
-                //         var html = data.toString();
-                //         // Res.send(html);
-                //         var title = '';
-                //         var content = '';
-                //         var $ = cheerio.load(html);
-                //         // $('.list .list_content li').each(function () {
-                //         //     url = $(this).find('h4 a').attr('href');
-                //         //
-                //         // });
-                //         title = $('.article .article_tit').find('h1').text();
-                //         $('.article .article_content p').each(function () {
-                //             content += $(this).text();
-                //         });
-                //         // Res.send(content);
-                //         // spider_model.inser_data(title,content);
-                //     })
-                // })
-            // });
-        // })
-    // })
+    })
 };
 exports.show = function (req,res,next) {
     spider_model.get_data(function (result) {

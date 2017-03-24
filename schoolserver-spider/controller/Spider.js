@@ -5,7 +5,9 @@ var spider = require('./common_spider');
 var request = require('request');
 var fs = require('fs');
 exports.insert_eat_data = function (req,res,next) {
+    //获取res
     var Res = res;
+    //爬取的网址
     var url = 'http://www.fanwen99.cn/article/%E4%B8%AD%E5%9B%BD%E7%9A%84%E7%BE%8E%E9%A3%9F%E4%BB%8B%E7%BB%8D.htm';
     // url = 'http://www.sina.com.cn';
     spider.getHtml(url,function(html){
@@ -31,6 +33,7 @@ exports.insert_eat_data = function (req,res,next) {
     });
 
 };
+//爬取指定url的链接
 function download(url,path,filename,callback) {
     console.log('a');
     http.get(url, function(res) {
